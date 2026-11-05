@@ -28,6 +28,7 @@ codex plugin add felspar@felspar
 
 | Skill | Use it to |
 | --- | --- |
+| `planning-agent-jobs` | Plan which decisions in a team's work need a pack and which to build first |
 | `preparing-policy-documents` | Write or strengthen a policy so a pack can be drafted from it |
 | `drafting-decision-packs` | Turn a connected policy document into a proposed Decision Pack |
 | `writing-pack-test-cases` | Write and maintain a pack's test cases |

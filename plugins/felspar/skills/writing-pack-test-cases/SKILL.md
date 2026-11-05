@@ -4,7 +4,7 @@ description: Writes and maintains test cases for a Felspar Decision Pack - one p
 compatibility: Requires the Felspar connector (list_jobs, read_pack, read_source, add_current_version, check_pack, check_readings, propose_pack, read_evals, save_evals, run_evals, list_eval_runs, read_eval_run) and a person signed in as a workspace member, approver or owner.
 metadata:
   author: felspar
-  version: "0.3.2"
+  version: "0.3.3"
 ---
 
 # Writing pack test cases
@@ -25,6 +25,7 @@ A test case is evidence for one case plus the outcome the policy says it should 
 - [ ] A case about a particular record gives its ID as the job's subject writes it (`subject: { id }`, lowercase for a case-insensitive subject).
 - [ ] The job has an eval set built to break it: raw, messy records mapped to each requirement key the way an agent would, with separate excerpts per key, every outcome, at least one expected hold and one conflict, all made up. Never one blob, and never a policy example reused as a case. Blind where your client allows it. See [eval sets](references/eval-sets.md).
 - [ ] Every case from the owner's stress table is covered, reworded, with the owner's answer as its expected result.
+- [ ] Every confirmed case from a case interview (`preparing-policy-documents`) is in the eval set, paraphrased, with the outcome the expert confirmed.
 - [ ] Every answer of every choice question has reading tests: plain, indirect, past-tense or dated, and a near miss that belongs to another answer, read with `check_readings` and every miss folded back.
 
 ## Held cases
@@ -46,7 +47,7 @@ A number or date conflict needs two readings the pack decides differently, one o
 ## Workflow
 
 1. Read the pack's questions (the draft in progress, or `read_pack` for a released job) and the source passages they quote (`read_source`).
-2. Ask the person for real past cases first; they find gaps made-up cases miss. Turn each into an anonymized case that keeps what it teaches, and write made-up cases for coverage the real ones lack.
+2. Ask the person for real past cases first; they find gaps made-up cases miss. Turn each into an anonymized case that keeps what it teaches, and write made-up cases for coverage the real ones lack. If `preparing-policy-documents` ran a case interview, start from its confirmed cases: they are real decisions the expert walked through and confirmed. Give each one an ID starting `confirmed-`, paraphrase it with invented names and numbers, and use the confirmed outcome as the expected result. A case the expert marked as a past exception expects what the policy says now, and its `why` says it was an exception.
 3. Write each case's evidence as the source would say it (an email line, a ticket note, a contract clause, a tracking record), with its source and date, never as a label.
 4. State the expected outcome from the policy, independently of what the draft currently returns. Add the case to the pack draft's test cases.
 5. Run the tests with `check_pack`. For each failure, decide with the person whether the rule or the expectation is wrong. Fix that one; never weaken a test to make it pass.
@@ -67,6 +68,7 @@ Test cases send answer values; reading tests send wording, the way agents will. 
 - **A past exception stays an exception.** If a real case was approved against the written policy, mark it as an expected exception and tell the owner; don't rewrite the rule to match it.
 - **Dates are relative to the case.** Set each case's evidence date to when the source said it; a "14 days after delivery" case needs both dates. In a pack draft, give numbers as numbers and dates as `YYYY-MM-DD`; a pack that compares with the decision date ("in the last 30 days") gives every case a `decisionDate`.
 - **Tests stay synthetic.** The proposal keeps the draft, so a real past case becomes a paraphrased case with invented names, companies and numbers: keep what it teaches, not who it was about. The same holds for reading tests.
+- **A confirmed case's outcome comes from the expert, not the draft.** If the pack decides it differently, the rule or the wording is wrong, or the expert's answer needs a second look with them; never change the expectation to match.
 - **The draft's own output is not the expected outcome.** Copying what the pack returns into the expectation makes the test pass by definition.
 
 ## Next actions
@@ -83,6 +85,7 @@ End every reply with where the person is and the one next thing: a question with
 | A test fails | Decide with the person whether the rule or the expectation is wrong; fix that one | The person |
 | A real past case contradicts the policy | Mark it an expected exception and tell the owner | The owner |
 | The policy doesn't say what a case should get | It's a gap: hand it to `drafting-decision-packs` as an owner decision | The owner |
+| A case interview handed over confirmed cases | Paraphrase each as a `confirmed-` eval case with the expert's outcome; add made-up cases only for what they don't cover | You |
 | No real cases supplied | Ask for two or three recent ones before writing synthetic cases | The person |
 | A reading test is held or read as another answer | Suggest an example, exclusion or sharper meaning for the document; read again after the edit | You, then the owner |
 | The job's evidence sources are reachable | Explain, then ask "OK to test on about N recent …?" before reading anything | The person |

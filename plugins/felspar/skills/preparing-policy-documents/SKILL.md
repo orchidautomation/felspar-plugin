@@ -1,10 +1,10 @@
 ---
 name: preparing-policy-documents
-description: Helps a policy owner write or strengthen the company's own policy document so a Felspar Decision Pack can be drafted from it - finds the decision, interviews the owner one decision-shaped question at a time with a recommended default, and writes paste-ready policy text with exact anchors in the document's own voice and structure, never inventing a rule. Use this skill when the policy is too thin, messy, missing ("it's in people's heads"), or a guide or FAQ rather than rules, when drafting-decision-packs says the document is "Thin" or "Not a decision policy", or when someone asks to write, tighten or fill gaps in a policy, playbook or SOP so their agents or Felspar can use it, even if they don't say 'Felspar'. Not for turning a ready document into a pack (drafting-decision-packs), writing test cases (writing-pack-test-cases), an edited document (triaging-source-changes), a change's impact (reviewing-pack-changes), approving (approving-and-releasing-packs) or connecting agents (connecting-company-agents).
+description: Helps a policy owner write or strengthen the company's own policy document so a Felspar Decision Pack can be drafted from it - interviews the owner one decision-shaped question at a time with a recommended default, or walks an expert who can't state the rules through real cases they decided and proposes the rules those cases imply, then writes paste-ready policy text in the document's own voice, never inventing a rule. Use this skill when the policy is thin, messy, missing ("it's in people's heads", "I just know"), or a FAQ rather than rules, when drafting-decision-packs says the document is "Thin" or "Not a decision policy", or when someone asks to write or fill gaps in a policy, playbook or SOP so their agents can use it, even if they don't say 'Felspar'. Not for turning a ready document into a pack (drafting-decision-packs), test cases (writing-pack-test-cases), an edited document (triaging-source-changes), a change's impact (reviewing-pack-changes), approving or connecting agents.
 compatibility: Works without tools by interviewing and writing text. With the Felspar connector (list_sources, read_source, add_current_version) it reads the connected document exactly; with a Google Docs editing tool it can insert confirmed wording. A person signed in as a workspace member, approver or owner.
 metadata:
   author: felspar
-  version: "0.2.0"
+  version: "0.3.1"
 ---
 
 # Preparing policy documents
@@ -16,9 +16,9 @@ You are an editor and interviewer, not the policy's author. Every rule comes fro
 ## Workflow
 
 - [ ] 1. **Read what exists.** If the document is connected, call `list_sources`, then `add_current_version` for its current text and `read_source` on the new `sourceObjectId`; if it's pasted, use that. If there is nothing written, start from a blank [policy template](references/policy-template.md). Never work from memory of an earlier version.
-- [ ] 2. **Find the decision.** Agree in two or three lines: what is being decided, for what kind of case, with which possible outcomes, and who decides it today. If the document covers several jobs (refunds and replacements and complaints), pick one with the person and list the others for later.
+- [ ] 2. **Find the decision.** Agree in two or three lines: what is being decided, for what kind of case, with which possible outcomes, and who decides it today. If the document covers several jobs (refunds and replacements and complaints), pick one with the person and list the others for later. If it isn't clear whether it's one decision or several, or the person wants an agent for a whole team, plan the jobs first with `planning-agent-jobs`.
 - [ ] 3. **Spot the gaps.** Compare the document with the [policy template](references/policy-template.md) and the [job patterns](references/job-patterns.md) for this kind of decision. Note each missing or vague piece. Patterns tell you what to ask; they never tell you the answer.
-- [ ] 4. **Interview, one question at a time.** Each question is decision-shaped and comes with a recommended default drawn from the patterns and what the person already said: "When is a leave request too late to approve? Most teams state a number of days' notice; is it 14?" Go in this order, skipping what the document already answers:
+- [ ] 4. **Interview, one question at a time.** If nothing is written and the person can't state the rules ("it depends", "I just know", a story instead of a rule), run [the case interview](references/case-interview.md) instead: they walk through real cases they decided, you propose the rules those cases imply in one table, and they correct you. Then use the list below only for what the cases didn't cover. Otherwise, each question is decision-shaped and comes with a recommended default drawn from the patterns and what the person already said: "When is a leave request too late to approve? Most teams state a number of days' notice; is it 14?" Go in this order, skipping what the document already answers:
   1. Purpose, and when the policy applies (and when it doesn't).
   2. What one case is, and how it's identified (a ticket number, an invoice number, a candidate's email).
   3. The categories, and how to tell them apart: a definition for each, what it includes, what it doesn't, an example, and a near miss. Include a "none of these" category and where it goes.
@@ -27,10 +27,10 @@ You are an editor and interviewer, not the policy's author. Every rule comes fro
   6. What to do when it's unclear or evidence is missing, and the kind of review that takes it (escalation).
   7. Required wording in replies or outputs, if any: what must be said, what must never be said.
   8. Two or three real examples with what actually happened.
-- [ ] 5. **Run the stress pass, once.** Before any text is final, read [the stress pass](references/stress-questions.md) and show one table of 8 to 12 hard made-up cases with your recommended results. The person answers by exception. Then offer a closing rule where one would settle many cases at once, and write each answer into the definition it changes. This is the only time you ask several things at once.
+- [ ] 5. **Run the stress pass, once.** After a case interview, only on the traps the cases didn't settle. Before any text is final, read [the stress pass](references/stress-questions.md) and show one table of 8 to 12 hard made-up cases with your recommended results. The person answers by exception. Then offer a closing rule where one would settle many cases at once, and write each answer into the definition it changes. Apart from the case interview's table of proposed rules, this is the only time you ask several things at once.
 - [ ] 6. **Write paste-ready policy text** after each section is settled, not after every answer. See [Writing the text](#writing-the-text).
 - [ ] 7. **Get it into the document.** Give the text to paste with its anchors. If this client has a tool that can edit the Google Doc, offer to insert it (as a suggestion, if the tool supports suggestions) only after the person confirms the exact wording. Never edit the document unconfirmed.
-- [ ] 8. **Hand back.** Ask the person to say when it's in. Then `drafting-decision-packs` captures the new version right away (`add_current_version`), re-reads it with `read_source` and drafts or revises the pack. Give it a short summary: what changed, which sections, which decisions are still open and with whom.
+- [ ] 8. **Hand back.** Ask the person to say when it's in. Then `drafting-decision-packs` captures the new version right away (`add_current_version`), re-reads it with `read_source` and drafts or revises the pack. Give it a short summary: what changed, which sections, which decisions are still open and with whom. After a case interview, also pass the confirmed cases to `writing-pack-test-cases` as the start of the eval set.
 
 ## Writing the text
 
@@ -48,7 +48,7 @@ You are an editor and interviewer, not the policy's author. Every rule comes fro
 
 ## Never invent policy
 
-- Every rule comes from the person in this conversation or from the document. A default you recommended is not a rule until the person says yes.
+- Every rule comes from the person in this conversation or from the document. A default you recommended, or a rule you proposed from their cases, is not a rule until the person says yes.
 - **The person doesn't know** ("use whatever is normal", "I'm not sure"): it is an open decision for the named owner. Draft the suggested wording anyway, and mark it plainly: "Needs a decision from the head of support: suggested wording below." Ask who the owner is if nobody is named.
 - **The person isn't the owner:** draft everything they can confirm, and mark the rest for the owner by role.
 - **Contradictions:** show both passages, quoted with where they sit, and ask which wins. Write the fix that removes the loser; never pick one yourself.
@@ -60,11 +60,16 @@ End every reply with where the person is and the **one** next thing. It's either
 
 | Situation | Next action |
 | --- | --- |
+| Person can't state a rule ("it depends", "I just know") | Switch to the case interview: ask for the most recent case they decided, and what made them decide it. |
+| Several cases told, no rules proposed yet | Show one table of proposed rules with the cases each explains; ask them to answer by exception. |
+| A case the proposed rules don't explain | Ask what made that case different; it's a missing rule, an exception or a past call they'd now make differently. |
+| A proposed rule rests on one case | Ask whether it holds in general before writing it. |
+| Case interview done | Fill the template from the confirmed rules, run the stress pass on what the cases didn't cover, and keep the cases for `writing-pack-test-cases`. |
 | Can't read the document | The person checks they have access, or pastes the text. Nothing is written from memory. |
 | Document not connected to Felspar yet | Write the text now; the person connects the document on the Felspar web page under Sources before drafting. |
 | Owner unknown | Ask who owns this policy (a role). Until then every rule is a suggestion. |
 | Person isn't the owner | Send the drafted sections, with open decisions marked, to the owner (by role) to confirm. |
-| Several jobs in one document | Pick one with the person now; list the others to prepare later. |
+| Several jobs in one document | Pick one with the person now; list the others to prepare later. If it's unclear how many jobs there are, plan them with `planning-agent-jobs`. |
 | Numbers stated as months or vague time | Ask for the number of days, with a recommended number, and whether the last day counts. |
 | Two rules contradict | Show both, ask which wins, and give the replacement text. |
 | Categories without a "none of these" | Propose the category and where it goes; ask to confirm. |
