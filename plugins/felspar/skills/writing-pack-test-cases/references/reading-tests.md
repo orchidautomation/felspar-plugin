@@ -27,7 +27,7 @@ Call `check_readings` with the `source_object_id`, the checked draft and the phr
 | --- | --- | --- |
 | `as_expected` | Read as the answer a person would pick, above the bar | Keep it if it covers a shape the others don't |
 | `different` | Read clearly as another answer (`picked`) | A miss: fold it back |
-| `held` | A live case would be held for a person. `reason`: `below_bar` (leaned toward `leaning` at `confidence`, short of `bar`), `cannot_tell`, `tie`, or `looks_like_instructions` | A miss, never a pass. For `looks_like_instructions`, check the phrasing reads like real evidence before treating it as a gap |
+| `held` | A live case would be held for a person. `reason`: `below_bar` (leaned toward `leaning`; `confidence` says `borderline` or `low`), `cannot_tell`, `tie`, or `looks_like_instructions` | A miss, never a pass. For `looks_like_instructions`, check the phrasing reads like real evidence before treating it as a gap |
 | `read` | No `expect` given | Show the person what it was read as and ask which answer it should get |
 | `not_read` | Not read now (`evaluation_off`, `limit_reached` or `not_answered`) | Untested, never a pass. Say which phrasings weren't read; read them again later |
 

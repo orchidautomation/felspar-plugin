@@ -1,7 +1,7 @@
 {
   "name": "felspar",
   "displayName": "Felspar",
-  "version": "0.3.20",
+  "version": "0.3.21",
   "description": "Turn your company's policy documents into tested, approved Decision Packs that every agent follows, and keep them current as the policy changes. Includes skills for drafting, testing, reviewing, approving and connecting agents, and the Felspar connector.",
   "author": { "name": "Felspar", "url": "https://felspar.ai" },
   "license": "Proprietary"
