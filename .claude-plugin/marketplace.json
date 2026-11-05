@@ -1,0 +1,17 @@
+{
+  "name": "felspar",
+  "owner": {
+    "name": "Felspar",
+    "url": "https://felspar.ai"
+  },
+  "metadata": {
+    "description": "The Felspar plugin: policy documents into Decision Packs every agent follows."
+  },
+  "plugins": [
+    {
+      "name": "felspar",
+      "source": "./plugins/felspar",
+      "description": "Turn your company's policy documents into tested, approved Decision Packs that every agent follows. Skills for drafting, testing, reviewing, approving and connecting agents, plus the Felspar connector."
+    }
+  ]
+}

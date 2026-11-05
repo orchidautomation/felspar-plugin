@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "felspar": {
+      "type": "streamable-http",
+      "url": "https://mcp.felspar.ai/mcp"
+    }
+  }
+}
