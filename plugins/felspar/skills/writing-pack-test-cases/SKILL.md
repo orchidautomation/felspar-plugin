@@ -96,3 +96,15 @@ End every reply with where the person is and the one next thing: a question with
 | `run_evals` lists `newMisses` | Report them first; trace each to the definition or rule and suggest the document edit | You, then the owner |
 | An eval case comes back `refused` | Fix the case (a question or source class the pack doesn't take), not the pack | You |
 | Tests pass and readings are clean | `propose_pack` so the cases go to review with the pack | You |
+
+For before/after testing, choose `base_environment: staging` or `production`, or
+`base_release_id`, on `run_evals`, `preview_change` or `backtest`. Never send both.
+Without a selector, defaults stay production except change-request previews use
+their original base. Compare a draft using `source_object_id` and `draft` to try
+wording without opening or replacing staging's source change request. Report the
+returned baseline identity and eval coverage (refused, notRead, total, comparable)
+beside newMisses. Zero new misses is not a pass. More than half refused or unread
+triggers a warning; even below it, say how many cases could expose a regression.
+Tell the person before a large run: both sides spend the existing allowance.
+Preview/backtest counts describe saved cases; label their diffs relative to the
+selected baseline. Only a person releases or promotes.

@@ -35,7 +35,7 @@ Judge the run on decisions, not readings. For each case report: decided correctl
 
 **Stop tuning.** Once a set has been used to change a pack, its results flatter that pack. Allow one round of fixes per set. After that, keep the set as a regression test and run a new blind set before release. Don't chase holds that reach a person: report them.
 
-**When a comparison means nothing.** If a candidate changes a question's evidence kinds, the current release refuses those cases, so `newMisses` says nothing. Judge the candidate's own results, and tell the person the current release can't be compared.
+**When a comparison means nothing.** If a candidate changes a question's evidence kinds, a baseline may refuse those cases, so zero `newMisses` is not a clean comparison. Choose the environment the candidate would replace, and report its refused, not-read and comparable counts beside the candidate's own results.
 
 ## Writing a set
 
@@ -78,7 +78,28 @@ A hiring job's conflict, where the form and the recruiter disagree:
 
 `run_evals` with `job_id` and one of `proposal_id`, `change_request_id`, or `source_object_id` and `draft`. Each case comes back for the candidate and the current release as `as_expected`, `held`, `differs`, `not_read` (never a pass) or `refused` (the case doesn't fit the pack: fix the case). Each question shows the answer read or leaned toward, and whether its confidence `clears` the bar, is `borderline` or `low`.
 
-- **Report `newMisses` first**: cases the current release reads as expected and the candidate doesn't. A proposal's newest run shows on its review (`read_proposal_review` → `evals`), so the person releasing sees them.
+- **Report the baseline and coverage beside `newMisses`**: cases the selected baseline reads as expected and the candidate doesn't. A proposal's newest run shows on its review (`read_proposal_review` → `evals`), so the person releasing sees them.
 - **Every run is kept.** Before running again, check `list_eval_runs`; `read_eval_run` opens one with what each case sent and what each side read, and `compare_with` shows what changed between two runs. Say who ran it and when if you use it. Send `mapper` to `run_evals` so the run says who mapped the records: `{ "kind": "llm", "provider", "model", "promptVersion" }` or `{ "kind": "supplied", "from" }`.
 - **A miss is never folded into the set.** Fix the document (an example, an exclusion, a sharper meaning) through a change request or redraft, then run again. Never change a case's expectation to what Felspar returned.
 - Running reads excerpts with Felspar's evaluator within the proposal's or change request's allowance (`allowance.percentLeft`) and today's limit; say how many cases you will run, and never discuss Felspar's internal costs or usage.
+
+## Choosing the comparison baseline
+
+`run_evals`, `preview_change` and `backtest` accept `base_environment` (`staging`
+or `production`) or `base_release_id`, never both. The selected release is pinned
+when the comparison starts and reported in `baseline`. Without a selector, the
+baseline stays production, except a change-request preview uses its original base.
+Use `source_object_id` and `draft` to compare other wording against staging without
+opening or replacing staging's source change request. A change-request preview can
+also choose a baseline; its candidate and original validity checks stay unchanged.
+An empty environment or unavailable release refuses with a next step.
+
+Report `baselineCoverage` beside eval `newMisses`: `refused`, `notRead`, `total`,
+and `comparable` (baseline cases that matched expectations). More than half refused
+or unread produces a warning. Zero new misses is never a pass: only comparable
+cases could expose a new miss. When no baseline exists, coverage is unavailable.
+Preview and backtest describe saved cases, rather than eval scores; their diffs
+and breaking changes are relative to the selected baseline. Both sides spend the
+existing allowance. Tell the person before a large run or reading a different
+baseline. Repeated eval runs may need fresh reads; past runs can be read without
+running them again. Comparisons never release, promote or replace a request.

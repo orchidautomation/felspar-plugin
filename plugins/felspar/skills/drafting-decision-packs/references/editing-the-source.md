@@ -28,7 +28,8 @@ The document is the only record of policy. A change you propose is a draft until
 - **Before opening, check what's open.** `list_change_requests` shows the job's open requests and their conflicts (the same rule, definition or passage). Show the person the other request rather than opening a competing one silently; `comment_on_change_request` adds to its discussion.
 - **Edits someone made directly in the document** arrive as change requests of their own (origin `outside_edit`), with who edited it when Google says. Treat them like any other: read, triage, discuss.
 - **The job has no release yet.** There is nothing to propose on: the person adds the lines to the document themselves. Give the exact wording and place, and ask them to say "done" when it's saved.
-- Approving, releasing, rejecting and withdrawing are a person's click on the Felspar web page. No tool does them; never say a change request is approved or live.
+- **Withdraw your own open item.** `withdraw_proposal` with `proposal_id`, or `withdraw_change_request` with `change_request_id`, withdraws only the signed-in person's own open item. Both require current proposing permission and source access; agent keys cannot call them. Other people's items, closed items, released proposals and promoted change requests are refused. Withdrawal does not edit the document.
+- Approving, releasing and rejecting are a person's click on the Felspar web page. No tool does them; never say a change request is approved or live.
 
 ## Picking it up (job not yet released)
 

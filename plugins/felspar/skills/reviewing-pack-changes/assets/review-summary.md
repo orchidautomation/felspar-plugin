@@ -1,5 +1,9 @@
 # [Job]: proposal [ID] vs release [version]
 
+Baseline: [release ID], selected by [environment or release ID]; serving environments at run time: [names or none]. Diffs and breaking changes below are relative to this baseline.
+
+Eval coverage, when available: [comparable] of [total] baseline cases matched expectations; [refused] refused; [not read] not read; [new misses] new misses. [Show the limited-coverage warning if present.] Zero new misses is not a pass. Backtest and preview counts describe saved cases, not eval scores.
+
 ## What changed in the policy
 
 - [Passage, quoted briefly, old → new]

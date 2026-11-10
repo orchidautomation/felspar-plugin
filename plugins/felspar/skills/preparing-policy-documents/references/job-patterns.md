@@ -12,6 +12,7 @@ Each pattern lists what a case is, the questions the decision usually needs (num
 - Finance: invoice approval, expense approval
 - IT and security: access requests
 - Engineering: code change review
+- Engineering: coding agent actions
 - Content and trust: publishing review, moderation
 - Procurement: vendor onboarding
 - Sales: lead qualification
@@ -96,6 +97,15 @@ Each pattern lists what a case is, the questions the decision usually needs (num
 - **Thresholds:** approvals required per risk level; how old a check or review may be relative to the latest revision.
 - **Escalations:** specialist review (often security) for sensitive areas; a second approver for high-risk changes; human review when the risk can't be settled.
 - **Gaps documents usually leave:** what makes an area "sensitive" (often only a folder list, though a filename or size rarely settles risk); who owns an area with no named owner; how a mixed change is rated (mostly low risk with one sensitive line); whether generated files, reverts or dependency updates follow the same rules; whether the author's own approval counts.
+
+## Engineering: coding agent actions
+
+- **Case:** one action a coding agent is about to take (a shell command, a file edit or another tool call); the tool call's own ID, so each call is its own case.
+- **Questions:** where the action lands (categories: local working copy, outside the project folder, shared non-production, production); whether it can be undone (reversible, recoverable with effort, irreversible); what it touches (application code, credentials or secrets, security controls, customer data, other people's work); whether an approved change record covers it; the record's valid-until date (date); whether data leaves the company.
+- **Outcomes:** allow, allow and flag for review, block. Never "ask the developer": the person who wants the action can't approve it at the prompt. Approval exists before the action, as a record in the change system that is looked up for the call.
+- **Thresholds:** rarely numbers; sometimes a count or size, such as files deleted or rows changed. The record's valid-until date is compared with the day of the call.
+- **Escalations:** change approval for work with no approved record; security review for credentials, secrets or weakened controls; incident review when an agent tries something destructive.
+- **Gaps documents usually leave:** how to tell production from staging when a command names neither; what an approval record must say (who requested and who approved it, which system, environment and kind of change it covers, until when); where approval comes from (a record the change system holds, or something the developer can edit, such as a ticket key in a branch name); whether the requester's own approval counts; what counts as weakening a security control (skipping checks, deleting tests, loosening a limit); what happens when the target or the record can't be found; which outside destinations are approved for data; what to do with a command that does several things at once or opens an interactive shell; whether the rules are about what a command does or how it's spelled.
 
 ## Content and trust: publishing review
 

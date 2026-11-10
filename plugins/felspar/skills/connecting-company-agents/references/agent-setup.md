@@ -19,7 +19,11 @@ Every request carries `Authorization: Bearer <agent key>`.
 GET  /v0/jobs
 GET  /v0/jobs/{job}/brief
 POST /v0/jobs/{job}/decisions
-     { "mode": "facts", "executionId": "<new UUID; reuse to retry>", "jobId": "<job>",
+     { "case": "<the case's ID>", "shadow"?: true,
+       "evidence": [{ "kind": "<a source class the brief lists>", "text": "..." | "toolCall": { "name", "input" }, "id"?: "<source ID>" }] }
+     → every answer, refusals included, carries decision: { action: allow | flag | block, reason, rule, nextStep,
+       missing, escalation: { id, trigger, text }, resultId, receiptUrl, open: [{ key, label }], toProceed }
+     or { "mode": "facts", "executionId": "<new UUID; reuse to retry>", "jobId": "<job>",
        "entityId": "<the case's ID, as the brief's subject says>",
        "related"?: { "<relationship>": "<its ID>" | ["<ID>", ...] },
        "facts": { "<question>": { "text": "...", "source": { ... }, "about"?: "<related ID>" } } }
@@ -32,6 +36,8 @@ POST /v0/executions/{executionObjectId}/verify
 
 The job's brief carries the job's questions and this request's format (`input.jsonSchema` over REST).
 
+Evidence by kind suits a hook or script that sees the same kinds of evidence every time, such as a coding agent's tool call and its change record: it labels each piece by kind and Felspar files it under every question that accepts that kind, so a pack that adds a question needs no code change. A coding agent's call goes as `toolCall`, as its runtime reports it; Felspar reads it, so the hook builds no text. The hook acts on `decision.action` alone: `block` covers every refusal and anything undecided. It needs no execution ID (the same body in the same hour returns the same result) and no release digest; `shadow: true` records a call the hook won't act on. Send facts by question when the agent gathers evidence question by question, or for a question about a related record.
+
 ## What to tell the builder
 
 - If the agent wasn't told which job to run, it calls `list_jobs` and picks the job whose purpose, use-when and not-for fit; if none fits, it says so instead of forcing one. Don't hard-code job routing in its instructions.
@@ -40,4 +46,10 @@ The job's brief carries the job's questions and this request's format (`input.js
 - Words a person gave the agent are the evidence: quote them as given with `source: { class, manual: true, locator }`, naming the source they came from in `locator`, with no `id` or `observedAt` (Felspar stamps the time). Never cite a page the agent didn't read. A job whose brief has `manualFacts: { allowed: false }` refuses them (`manual_facts_refused`).
 - Act only on Felspar's outcome; treat "needs evidence" as unresolved.
 - When a result (or an `attempt_limit_reached` refusal) carries `escalation`, report `escalation.id` exactly and hand the case off that way; don't ask again, decide yourself, or invent an escalation. The builder's code maps each id to its action (a review queue, a message, another job); Felspar returns the id and stops.
+- On a `decision` from evidence by kind, act on `action` and tell the person what the rest says, in its own words:
+  - `reason`: why. Relay it; don't restate it.
+  - `nextStep`: what the policy says to do now. Do that. After a block, don't retry the same action another way.
+  - `open` and `toProceed`: when Felspar couldn't decide, say which facts it couldn't settle (`open[].label`), and either send the evidence `toProceed` names or ask the person to decide.
+  - `escalation.text`: who takes it from here. Tell the person; Felspar doesn't send it anywhere.
+  - `resultId` and `receiptUrl`: keep them with whatever is done, so the person can look the decision up.
 - Verify the receipt before a consequential action.
