@@ -42,7 +42,7 @@ Judge the run on decisions, not readings. For each case report: decided correctl
 
 1. **Start from the pack's evidence kinds.** Read the draft or `read_pack`: its `evidenceKinds`, each question's `meaning`, answers, examples and source classes. For each kind, picture what an agent pulls from that system: a structured line (an order or quote line, a form field), a paragraph of someone's notes, a message from the other party, a note a person pasted.
 2. **Cover every outcome**, with realistic noise: excerpts that mention the answer in passing, use other words for it, or bury it in a long paragraph. One to three excerpts per question; several sources for the same question where agents would send several.
-3. **At least one expected hold and one conflict.** A hold where the wording doesn't settle the answer (`{ "held": "missing" }`), a conflict where two sources disagree (`{ "held": "conflict" }`), and a stale one (`"ageDays"` past the pack's evidence age, `{ "held": "stale" }`) when the document limits evidence age.
+3. **At least one expected hold and one conflict.** Each case sends the record the agent looked at for every question the pack asks on every case, even when it doesn't hold the answer: a case that sends nothing for one is refused before it is read (`required_evidence_missing`), and `save_evals` and `check_pack` warn `eval_case_evidence_missing`. A hold where the wording doesn't settle the answer (`{ "held": "missing" }`), a conflict where two sources disagree (`{ "held": "conflict" }`), and a stale one (`"ageDays"` past the pack's evidence age, `{ "held": "stale" }`) when the document limits evidence age.
 4. **One pasted note** (`"manual": true` and `"suppliedBy"`) when people paste facts for agents.
 5. **Write `why` from the document**, never from what the pack returns.
 6. **Synthetic or anonymized only.** Invent names, companies, numbers and IDs; keep what a real case teaches, never the record. Send `synthetic: true` only when that is so. Never put text from a real record in a set: saving over a set doesn't remove it, because earlier versions and past runs keep what they held.
@@ -55,39 +55,73 @@ Judge the run on decisions, not readings. For each case report: decided correctl
 Rotate examples across verticals. A claims job:
 
 ```json
-{ "id": "burst-pipe-photos", "why": "<quote: sudden water damage is covered>",
+{
+  "id": "burst-pipe-photos",
+  "why": "<quote: sudden water damage is covered>",
   "subject": "CLM-5501",
   "facts": {
     "cause": [
-      { "text": "Adjuster note: pipe under the kitchen sink split overnight, standing water in two rooms.",
-        "source": { "class": "adjuster-note", "id": "claims:CLM-5501/note/3", "locator": "notes" } },
-      { "text": "Policyholder email: we woke up to the floor soaked, the plumber says the fitting failed.",
-        "source": { "class": "customer-email", "id": "mail:m-412", "ageDays": 1 } }
+      {
+        "text": "Adjuster note: pipe under the kitchen sink split overnight, standing water in two rooms.",
+        "source": { "class": "adjuster-note", "id": "claims:CLM-5501/note/3", "locator": "notes" }
+      },
+      {
+        "text": "Policyholder email: we woke up to the floor soaked, the plumber says the fitting failed.",
+        "source": { "class": "customer-email", "id": "mail:m-412", "ageDays": 1 }
+      }
     ],
-    "estimate": { "text": "Estimate total: $4,850.00", "source": { "class": "estimate", "id": "est:9921" } }
+    "estimate": {
+      "text": "Estimate total: $4,850.00",
+      "source": { "class": "estimate", "id": "est:9921" }
+    }
   },
-  "expect": { "outcome": "fast-track" } }
+  "expect": { "outcome": "fast-track" }
+}
 ```
 
 A filing job whose evidence is a public registry page, where the quoted words aren't on the cited page:
 
 ```json
-{ "id": "quote-not-on-filing", "why": "<quote: only a filing on the public register counts>",
-  "facts": { "filed_on_time": {
-    "text": "Annual return received 2026-03-02",
-    "source": { "class": "register-entry", "id": "RC-10442",
-      "url": "https://register.example.org/companies/RC-10442/filings", "page": "not_found" } } },
-  "expect": { "held": "missing" }, "gate": true }
+{
+  "id": "quote-not-on-filing",
+  "why": "<quote: only a filing on the public register counts>",
+  "facts": {
+    "filed_on_time": {
+      "text": "Annual return received 2026-03-02",
+      "source": {
+        "class": "register-entry",
+        "id": "RC-10442",
+        "url": "https://register.example.org/companies/RC-10442/filings",
+        "page": "not_found"
+      }
+    }
+  },
+  "expect": { "held": "missing" },
+  "gate": true
+}
 ```
 
 A hiring job's conflict, where the form and the recruiter disagree on a choice:
 
 ```json
-{ "id": "two-work-modes", "why": "<quote: the work mode is the one on the signed offer>",
-  "facts": { "work_mode": [
-    { "text": "Offer form: work mode on-site", "source": { "class": "offer-form", "id": "ats:o-77" } },
-    { "text": "Recruiter: she will work fully remote", "source": { "class": "recruiter-note", "manual": true, "suppliedBy": "Recruiter" } } ] },
-  "expect": { "held": "conflict" }, "gate": true }
+{
+  "id": "two-work-modes",
+  "why": "<quote: the work mode is the one on the signed offer>",
+  "facts": {
+    "work_mode": [
+      {
+        "text": "Offer form: work mode on-site",
+        "source": { "class": "offer-form", "id": "ats:o-77" }
+      },
+      {
+        "text": "Recruiter: she will work fully remote",
+        "source": { "class": "recruiter-note", "manual": true, "suppliedBy": "Recruiter" }
+      }
+    ]
+  },
+  "expect": { "held": "conflict" },
+  "gate": true
+}
 ```
 
 ## Running a set
@@ -97,28 +131,13 @@ A hiring job's conflict, where the form and the recruiter disagree on a choice:
 - **Report the baseline and coverage beside `newMisses`**: cases the selected baseline reads as expected and the candidate doesn't. A proposal's newest run shows on its review (`read_proposal_review` → `evals`), so the person releasing sees them.
 - **Every run is kept.** Before running again, check `list_eval_runs`; `read_eval_run` opens one with what each case sent and what each side read, and `compare_with` shows what changed between two runs. Say who ran it and when if you use it. Send `mapper` to `run_evals` so the run says who mapped the records: `{ "kind": "llm", "provider", "model", "promptVersion" }` or `{ "kind": "supplied", "from" }`.
 - **The reader, an advanced choice.** A job's runs read with the reader its release runs. For a job with no release yet, leave `reader` out unless the person has chosen another reader for its first release; then send that same `reader` to `run_evals`, so the run that gates the release reads as the release will. A job with a release keeps its reader: `run_evals` with another returns `release_reader_fixed`.
-- **Release waits on gating cases.** A job with no eval set, or whose marked cases lack an outcome, a hold or a conflict, is never released. When the set marks cases `gate: true`, a run says in `gate` whether it lets the candidate be released (`passes` or `blocks`, with each case still blocking by what was expected and what happened; `not_run` when the run didn't send it or ran an earlier version of the set). Releasing the proposal, staging the change request's candidate, or promoting either from staging, is refused with `evals_gate_blocked` until the newest run of the current set against it passes; suggested bars can't be accepted on that release. A staged release that waits on cases saved after it was staged is proposed again, run and staged before it is promoted. Run the whole set after every change to the set or the pack, and report `gate` first. `speed` gives each side's latency per decision (`latencyMs`, p50 and p95, where each read of a case is one decision) beside `decidedShare` (cases expecting an outcome decided as expected) and `wrongRate` (decided cases whose outcome isn't the one expected): report it beside `gate`. It never changes what a release decides.
+- **Release waits on gating cases.** A job with no eval set, or whose marked cases lack an outcome, a hold or a conflict, is never released. When the set marks cases `gate: true`, a run says in `gate` whether it lets the candidate be released (`passes` or `blocks`, with each case still blocking by what was expected and what happened; `not_run` when the run didn't send it or ran an earlier version of the set). Releasing the proposal, staging the change request's candidate, or promoting either from staging, is refused with `evals_gate_blocked` until the newest run of the current set against it passes; suggested bars can't be accepted on that release. A staged release that waits on cases saved after it was staged is proposed again, run and staged before it is promoted. Run the whole set after every change to the set or the pack, and report `gate` first. `speed` gives each side's latency per decision (`latencyMs`, p50 and p95, where each read of a case is one decision) beside `decidedShare` (cases expecting an outcome decided as expected) and `wrongRate` (decided cases whose outcome isn't the one expected): report it beside `gate`. It never changes what a release decides. Felspar's bar for `decidedShare` is 80% (`decidedBar`; `belowDecidedBar` says whether a side falls short): a run whose candidate is under it carries `speed.warning`, and `check_pack` warns `decided_share_below_bar` about the newest run of the draft. Report it, look at the held and wrong cases and fix the wording through the edit loop; never change a case's expected outcome to pass. The bar is report-only: only cases marked `gate: true` block a release.
 - **Gating cases are read three times.** A run reads each `gate: true` case three times on the candidate, so gating cases spend up to three times their share of the allowance. A case comes back `as_expected` only when all three reads agree; otherwise it is `disagreed` (never a pass) and `reads` lists what each read found. Treat `disagreed` like a borderline confidence: suggest a sharper meaning or an example to the owner, redraft and run again. If the run is refused with `eval_reads_not_covered`, nothing was read: when `details.limit` is `today`, run the whole set again tomorrow. When it is `allowance`, tell the person the shortfall (`details.readsNeeded` against `details.readsAvailable`); if `details.topUp` is `available`, an approver of this job can grant its one top-up on the job page, then run the whole set again. You can't grant it yourself. Otherwise tell the person, since a run of fewer cases never passes the release gate.
 - **A miss is never folded into the set.** Fix the document (an example, an exclusion, a sharper meaning) through a change request or redraft, then run again. Never change a case's expectation to what Felspar returned.
 - Running reads excerpts with Felspar's evaluator within the proposal's or change request's allowance (`allowance.percentLeft`) and today's limit; say how many cases you will run, and never discuss Felspar's internal costs or usage.
 
 ## Choosing the comparison baseline
 
-`run_evals`, `preview_change` and `backtest` accept `base_environment` (`staging`
-or `production`) or `base_release_id`, never both. The selected release is pinned
-when the comparison starts and reported in `baseline`. Without a selector, the
-baseline stays production, except a change-request preview uses its original base.
-Use `source_object_id` and `draft` to compare other wording against staging without
-opening or replacing staging's source change request. A change-request preview can
-also choose a baseline; its candidate and original validity checks stay unchanged.
-An empty environment or unavailable release refuses with a next step.
+`run_evals`, `preview_change` and `backtest` accept `base_environment` (`staging` or `production`) or `base_release_id`, never both. The selected release is pinned when the comparison starts and reported in `baseline`. Without a selector, the baseline stays production, except a change-request preview uses its original base. Use `source_object_id` and `draft` to compare other wording against staging without opening or replacing staging's source change request. A change-request preview can also choose a baseline; its candidate and original validity checks stay unchanged. An empty environment or unavailable release refuses with a next step.
 
-Report `baselineCoverage` beside eval `newMisses`: `refused`, `notRead`, `total`,
-and `comparable` (baseline cases that matched expectations). More than half refused
-or unread produces a warning. Zero new misses is never a pass: only comparable
-cases could expose a new miss. When no baseline exists, coverage is unavailable.
-Preview and backtest describe saved cases, rather than eval scores; their diffs
-and breaking changes are relative to the selected baseline. Both sides spend the
-existing allowance. Tell the person before a large run or reading a different
-baseline. Repeated eval runs may need fresh reads; past runs can be read without
-running them again. Comparisons never release, promote or replace a request.
+Report `baselineCoverage` beside eval `newMisses`: `refused`, `notRead`, `total`, and `comparable` (baseline cases that matched expectations). More than half refused or unread produces a warning. Zero new misses is never a pass: only comparable cases could expose a new miss. When no baseline exists, coverage is unavailable. Preview and backtest describe saved cases, rather than eval scores; their diffs and breaking changes are relative to the selected baseline. Both sides spend the existing allowance. Tell the person before a large run or reading a different baseline. Repeated eval runs may need fresh reads; past runs can be read without running them again. Comparisons never release, promote or replace a request.
