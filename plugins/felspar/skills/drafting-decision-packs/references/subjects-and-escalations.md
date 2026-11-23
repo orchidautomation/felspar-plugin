@@ -16,6 +16,7 @@ Declare each kind of record the document talks about once, and name the job's ow
 | `definition` | The quote that says what the record is. |
 | `identifier` | How its ID is written: "help desk ticket number", "contract ID", "web domain". |
 | `example` | One ID, written as Felspar keeps it (lowercase when matching is case-insensitive). |
+| `idPattern` | Optional: the ID's form, character by character, with `#` for a digit, `?` for a letter and anything else as written, such as `CLM-#####`, with at least one character written as itself. The `example` must follow it. Declare it when records name IDs in one fixed form: an excerpt naming other IDs of that form, but not the case's own (or its related record's), doesn't count for the case. Give each subject a form no other subject shares. |
 | `match` | `exact` (default) or `case-insensitive` for web domains and email addresses. |
 
 Felspar normalizes the case ID by the job subject's `match` before it counts attempts, keeps history or writes a receipt, so `Jo@Example.com` and `jo@example.com` are one case.
@@ -43,6 +44,14 @@ Pick the mode from what the document says identifies a case; ask the person when
 ## Escalations
 
 `escalations: [{ id, quote }]` lists each hand-off the document names. Name the kind of review (`human-review`, `legal-review`, `risk-review`), never a tool, channel or person: the company's own code decides what each id does. Point at them with `escalate` on an outcome, on `whenUnresolved` (`{ "quote", "escalate" }`) and on `attempts`. A test case may assert `expect.escalation`.
+
+## Adverse outcomes
+
+Mark `adverse: true` on each outcome that goes against the case: a claim denial, a loan decline, a vendor rejection, a candidate turned down. A case decided with an adverse outcome goes to a person instead of acting: the result has `outcome: null`, names the outcome as `proposedOutcome`, keeps the outcome's `escalate` hand-off, and its receipt carries `adverseReview`. That is the default. Only `adverseOutcomes: "act"` lets adverse outcomes act unattended: set it only when the owner confirms the document allows it, and record that in the gap report. Test cases and eval cases still expect the outcome itself (an eval side marks it `toPerson`), so the decision logic stays testable. Ask the owner which outcomes are adverse when the document doesn't make it plain.
+
+## Changed outcomes
+
+A case can be decided more than once. A later decision with a different outcome is marked `earlierDecision.changed: true` and linked from the earlier decision's reads; that is the default, `changedOutcomes: "flag"`. Set `changedOutcomes: "to-person"` when the document says a reversed decision needs a person (a refund approved after a denial, a reopened claim, an applicant moved from decline to approve): the changed result then has `outcome: null`, names the outcome as `proposedOutcome`, and its receipt carries `changedReview`. Ask the owner when the document doesn't say, and record the answer in the gap report.
 
 Customer code maps escalation ids to actions. When you revise a pack, keep every escalation id, subject type and relationship name the current release has. `check_pack`, `propose_pack` and `backtest` list any removal or rename under `breaking`, with how many agents run the job; report each one to the person.
 

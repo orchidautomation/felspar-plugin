@@ -4,7 +4,7 @@ description: Writes and maintains test cases for a Felspar Decision Pack - one p
 compatibility: Requires the Felspar connector (list_jobs, read_pack, read_source, add_current_version, check_pack, check_readings, propose_pack, read_evals, save_evals, run_evals, list_eval_runs, read_eval_run) and a person signed in as a workspace member, approver or owner.
 metadata:
   author: felspar
-  version: "0.3.3"
+  version: "0.3.5"
 ---
 
 # Writing pack test cases
@@ -18,14 +18,17 @@ A test case is evidence for one case plus the outcome the policy says it should 
 - [ ] Every passage the draft's `coverage` marks `represented` by a rule has a case that rule decides; a `needs_review` or `unsupported` passage gets no case until the owner settles it (for a refund policy's "managers may waive the restocking fee", no case expects a waived fee).
 - [ ] Every exception has a case where it applies and one where it almost does. A case where an exception applies expects the exception's rule: in a claims pack where `"water-damage"` names `"except": ["flood-zone"]`, a flood-zone water-damage claim expects `{ "outcome": "adjuster-visit", "rule": "flood-zone" }`. Never write a case that only a contradiction `check_pack` reported would decide: that is the owner's gap.
 - [ ] In a scored pack, every case states its total (`expect.score`), and every score band has cases at the nearest totals inside and outside its edge.
-- [ ] Held cases are required: at least one where evidence is missing and the pack must not decide, and one with stale evidence when the document limits evidence age. When one question has its own age (`evidence.maxEvidenceAgeDays`), the stale case is about that question: in a claims pack whose adjuster estimate may be 14 days old, `{ "claim_amount": { "stale": 500 } }` expects `{ "held": "stale" }`. Add a conflict case where two sources can disagree. `check_pack` warns (`no_held_case`) when a pack has none.
+- [ ] Held cases are required: at least one where evidence is missing and the pack must not decide, and one with stale evidence when the document limits evidence age. When one question has its own age (`evidence.maxEvidenceAgeDays`), the stale case is about that question: in a claims pack whose adjuster estimate may be 14 days old, `{ "claim_amount": { "stale": 500 } }` expects `{ "held": "stale" }`. Add a conflict case where two sources can disagree. `check_pack` warns (`no_held_case`) when a pack has none, and (`no_stale_case`) when the document states an evidence age no case holds a stale reading for.
 - [ ] Where answer options classify text, at least one case has text that should pass and one that should fail.
 - [ ] Real past decisions the person supplies are included, each with what actually happened.
 - [ ] When the policy names an escalation for an outcome, a case with that outcome asserts it (`expect.escalation`).
+- [ ] Every outcome marked `adverse` has a case that expects it: the case passes on the proposed outcome, and its eval side says `toPerson` because a live case goes to a person.
 - [ ] A case about a particular record gives its ID as the job's subject writes it (`subject: { id }`, lowercase for a case-insensitive subject).
 - [ ] The job has an eval set built to break it: raw, messy records mapped to each requirement key the way an agent would, with separate excerpts per key, every outcome, at least one expected hold and one conflict, all made up. Never one blob, and never a policy example reused as a case. Blind where your client allows it. See [eval sets](references/eval-sets.md).
 - [ ] Every case from the owner's stress table is covered, reworded, with the owner's answer as its expected result.
+- [ ] The cases a release must get right are marked `gate: true`, including follow-ups sent over several calls (`earlier`) and records dated after the decision (expect `{ "held": "stale" }`), at least one expecting an outcome, one expecting a hold and one expecting a conflict (a release is refused without all three), and the newest `run_evals` of the current set against the candidate reports `gate.status: passes`. See [eval sets](references/eval-sets.md).
 - [ ] Every confirmed case from a case interview (`preparing-policy-documents`) is in the eval set, paraphrased, with the outcome the expert confirmed.
+- [ ] Every rule that says where a fact must come from has an eval case where only the wrong source gives it (a caller's guess where a written estimate is required), and every question gated on another has a case where the gating answer is clear but the gated fact is missing.
 - [ ] Every answer of every choice question has reading tests: plain, indirect, past-tense or dated, and a near miss that belongs to another answer, read with `check_readings` and every miss folded back.
 
 ## Held cases
@@ -80,6 +83,7 @@ End every reply with where the person is and the one next thing: a question with
 | An outcome has no case | Write one from a real past case, or a synthetic one if there is none | You, with the person |
 | A threshold lacks a case on one side | Add the last value that meets it and the first that doesn't | You |
 | No held case (`no_held_case`) | Add a missing-evidence case, and a stale one if the document limits evidence age | You |
+| No stale case (`no_stale_case`) | Add a case with a stale reading of a question the age applies to, expecting `{ "held": "stale" }` | You |
 | A held case was decided | Find which fact the deciding rule should need; fix the rule with the person | The person |
 | A case is dated outside the business-day calendar (`case_outside_calendar`) | Date it inside the calendar's years, or ask the owner for the next year's holidays | You, or the owner |
 | A test fails | Decide with the person whether the rule or the expectation is wrong; fix that one | The person |
@@ -95,16 +99,7 @@ End every reply with where the person is and the one next thing: a question with
 | The job has no eval set | Write one from its evidence kinds: every outcome, a hold and a conflict; `save_evals`, then `run_evals` | You |
 | `run_evals` lists `newMisses` | Report them first; trace each to the definition or rule and suggest the document edit | You, then the owner |
 | An eval case comes back `refused` | Fix the case (a question or source class the pack doesn't take), not the pack | You |
+| Release, staging or promotion is refused with `evals_gate_blocked` | `run_evals` the whole current set on that proposal or change request; fix the pack until every case in `gate.blocking` comes back as expected, never the case. A staged release waiting on cases saved after it was staged is proposed again, run and staged first | You, then the owner |
 | Tests pass and readings are clean | `propose_pack` so the cases go to review with the pack | You |
 
-For before/after testing, choose `base_environment: staging` or `production`, or
-`base_release_id`, on `run_evals`, `preview_change` or `backtest`. Never send both.
-Without a selector, defaults stay production except change-request previews use
-their original base. Compare a draft using `source_object_id` and `draft` to try
-wording without opening or replacing staging's source change request. Report the
-returned baseline identity and eval coverage (refused, notRead, total, comparable)
-beside newMisses. Zero new misses is not a pass. More than half refused or unread
-triggers a warning; even below it, say how many cases could expose a regression.
-Tell the person before a large run: both sides spend the existing allowance.
-Preview/backtest counts describe saved cases; label their diffs relative to the
-selected baseline. Only a person releases or promotes.
+For before/after testing, choose `base_environment: staging` or `production`, or `base_release_id`, on `run_evals`, `preview_change` or `backtest`. Never send both. Without a selector, defaults stay production except change-request previews use their original base. Compare a draft using `source_object_id` and `draft` to try wording without opening or replacing staging's source change request. Report the returned baseline identity and eval coverage (refused, notRead, total, comparable) beside newMisses. Zero new misses is not a pass. More than half refused or unread triggers a warning; even below it, say how many cases could expose a regression. Tell the person before a large run: both sides spend the existing allowance. Preview/backtest counts describe saved cases; label their diffs relative to the selected baseline. Only a person releases or promotes.
