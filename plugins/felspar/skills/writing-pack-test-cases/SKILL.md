@@ -4,7 +4,7 @@ description: Writes and maintains test cases for a Felspar Decision Pack - one p
 compatibility: Requires the Felspar connector (list_jobs, read_pack, read_source, add_current_version, check_pack, check_readings, propose_pack, read_evals, save_evals, run_evals, list_eval_runs, read_eval_run) and a person signed in as a workspace member, approver or owner.
 metadata:
   author: felspar
-  version: "0.3.5"
+  version: "0.3.6"
 ---
 
 # Writing pack test cases

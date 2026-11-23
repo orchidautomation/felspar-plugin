@@ -1,10 +1,10 @@
 ---
 name: approving-and-releasing-packs
 description: Prepares a Felspar approver to approve and release a Decision Pack on the Felspar web page - confirms the exact proposal reviewed, shows what changes and which agents are affected, and hands the person the review link to approve and release it themselves, to staging first or straight to production. Use this skill when someone asks to approve, release, ship, publish, stage, promote, roll back or roll out a pack or policy change for their agents. Not for reviewing impact without approving (reviewing-pack-changes).
-compatibility: Requires the Felspar connector, signed in as the person. Approving, releasing, promoting and rolling back happen only on the Felspar web page, as that person's own click; no tool can do any of them, and members and agents cannot either.
+compatibility: Requires the Felspar connector (list_proposals, read_proposal, read_proposal_review, read_pack, read_environments), signed in as the person. Approving, releasing, promoting and rolling back happen only on the Felspar web page, as that person's own click; no tool can do any of them, and members and agents cannot either.
 metadata:
   author: felspar
-  version: "0.3.0"
+  version: "0.3.1"
 ---
 
 # Approving and releasing packs
@@ -13,13 +13,13 @@ Approval says "this is what the company means". Release makes it what agents fol
 
 ## Sequence
 
-1. **Identify the exact proposal** the person means (its ID from `propose_pack`). If they haven't seen a review summary, produce one first with `reviewing-pack-changes`.
+1. **Identify the exact proposal** the person means (its ID from `propose_pack`, or `list_proposals` for the newest proposals, their approvals and releases; `read_proposal` says where one stands and whether the person proposed it). If they haven't seen a review summary, produce one first with `reviewing-pack-changes`.
 2. **Show the consequences** in two or three lines from `backtest`: decisions that change (old outcome to new), cases still unresolved, and the agents that follow this job and will get the release.
 3. **Hand them the review link** that `propose_pack` returned, and say what they'll do there: approve the proposal, then release it. Only the job's approvers can: name them from `owners` in `list_jobs`, `read_pack` or `propose_pack` (a workspace owner can also act as a recorded fallback).
 4. **Suggested confidence bars,** if a backtest of the proposal suggested any, appear on the release page as boxes to tick. Tell the person which questions have one and what each would change (the backtest's `calibration`): they tick the ones they accept on the release click; unticked questions keep the bar they were proposed with.
 5. **Staging first, when it's a change worth trying.** Each job has a staging and a production environment. On the approval page the person can click **Release to staging** instead: production keeps its release and only staging agents (registered with a staging key) run the new one. When it behaves as expected, they click **Promote staging's release to production** on the job's page; production then runs exactly the release staging ran, nothing rebuilt. Read where each environment stands with `read_environments`.
 6. **A change request is approved once on the job's page.** For a Google Doc, the approver reviews each numbered change and clicks **Approve, write to Google and promote**: Felspar writes the lines into the Doc with their own Google connection, reads it back and promotes, keeping the Doc's headings, lists and formatting. They can instead release its candidate (the document with its changes applied) to staging first, then click **Write to Google and promote**. If a change can't be written, the page names the change and why (pending suggestions, a replacement inside bold or linked text, a table); a change that only adds text after its passage avoids most of these. Someone who edits the document by hand promotes once it holds exactly the candidate's text: you run `add_current_version`, and the page or `read_environments` lists any changes still missing. If the document changed where a line goes, nothing is written and the request goes back to its author as out of date.
-7. **Afterwards,** if they ask, confirm with `read_environments` and `backtest` that the release is what agents now use.
+7. **Afterwards,** if they ask, confirm with `read_environments` and `backtest` that the release is what agents now use; `read_pack` with the release's ID reads what it holds.
 
 ## Gotchas
 
