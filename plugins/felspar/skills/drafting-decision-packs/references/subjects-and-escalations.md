@@ -4,7 +4,7 @@ A pack says what each case is about and where a case goes when it can't be decid
 
 ## The job first
 
-`purpose` quotes why the job exists and what it resolves. `useWhen` and `notFor` quote when the document says to use it and when not. `owner` quotes the accountable role if the document names one; leave it out otherwise. An agent that wasn't told which job to run picks one from these with `list_jobs`.
+`purpose` quotes why the job exists and what it resolves. `useWhen` and `notFor` quote when the document says to use it and when not. `owner` quotes the accountable role if the document names one; leave it out otherwise. An agent that wasn't told which job to run picks one from these with `list_jobs`, so a release needs `purpose` and at least one `useWhen`: `check_pack` warns `job_routing_missing` while either is missing, and the release is refused with the same code.
 
 ## Subjects
 
@@ -47,7 +47,7 @@ Pick the mode from what the document says identifies a case; ask the person when
 
 ## Adverse outcomes
 
-Mark `adverse: true` on each outcome that goes against the case: a claim denial, a loan decline, a vendor rejection, a candidate turned down. A case decided with an adverse outcome goes to a person instead of acting: the result has `outcome: null`, names the outcome as `proposedOutcome`, keeps the outcome's `escalate` hand-off, and its receipt carries `adverseReview`. That is the default. Only `adverseOutcomes: "act"` lets adverse outcomes act unattended: set it only when the owner confirms the document allows it, and record that in the gap report. Test cases and eval cases still expect the outcome itself (an eval side marks it `toPerson`), so the decision logic stays testable. Ask the owner which outcomes are adverse when the document doesn't make it plain.
+Mark `adverse: true` on each outcome that goes against the case: a claim denial, a loan decline, a vendor rejection, a candidate turned down. A case decided with an adverse outcome goes to a person instead of acting: the result has `outcome: null`, names the outcome as `proposedOutcome`, keeps the outcome's `escalate` hand-off, and its receipt carries `adverseReview`. That is the default. Only `adverseOutcomes: "act"` lets adverse outcomes act unattended: set it only when the owner confirms the document allows it, and record that in the gap report. Test cases and eval cases still expect the outcome itself (an eval side marks it `toPerson`), so the decision logic stays testable. Ask the owner which outcomes are adverse when the document doesn't make it plain. `check_pack` warns `adverse_outcome_unmarked` about an unmarked outcome that reads as going against the case; it never blocks.
 
 ## Changed outcomes
 

@@ -4,7 +4,7 @@ description: Writes and maintains test cases for a Felspar Decision Pack - one p
 compatibility: Requires the Felspar connector (list_jobs, read_pack, read_source, add_current_version, check_pack, check_readings, propose_pack, read_evals, save_evals, run_evals, list_eval_runs, read_eval_run) and a person signed in as a workspace member, approver or owner.
 metadata:
   author: felspar
-  version: "0.3.6"
+  version: "0.3.7"
 ---
 
 # Writing pack test cases
@@ -26,7 +26,7 @@ A test case is evidence for one case plus the outcome the policy says it should 
 - [ ] A case about a particular record gives its ID as the job's subject writes it (`subject: { id }`, lowercase for a case-insensitive subject).
 - [ ] The job has an eval set built to break it: raw, messy records mapped to each requirement key the way an agent would, with separate excerpts per key, every outcome, at least one expected hold and one conflict, all made up. Never one blob, and never a policy example reused as a case. Blind where your client allows it. See [eval sets](references/eval-sets.md).
 - [ ] Every case from the owner's stress table is covered, reworded, with the owner's answer as its expected result.
-- [ ] The cases a release must get right are marked `gate: true`, including follow-ups sent over several calls (`earlier`) and records dated after the decision (expect `{ "held": "stale" }`), at least one expecting an outcome, one expecting a hold and one expecting a conflict (a release is refused without all three), and the newest `run_evals` of the current set against the candidate reports `gate.status: passes`. See [eval sets](references/eval-sets.md).
+- [ ] The cases a release must get right are marked `gate: true`, including follow-ups sent over several calls (`earlier`) and records dated after the decision (expect `{ "held": "stale" }`), at least one expecting an outcome, one expecting a hold and one expecting a conflict (a release is refused without all three; in a pack whose questions are all numbers or dates, a case whose two excerpts give different figures, expecting `{ "held": "review" }`, stands in for the conflict, beside another hold), and the newest `run_evals` of the current set against the candidate reports `gate.status: passes`. See [eval sets](references/eval-sets.md).
 - [ ] Every confirmed case from a case interview (`preparing-policy-documents`) is in the eval set, paraphrased, with the outcome the expert confirmed.
 - [ ] Every rule that says where a fact must come from has an eval case where only the wrong source gives it (a caller's guess where a written estimate is required), and every question gated on another has a case where the gating answer is clear but the gated fact is missing.
 - [ ] Every answer of every choice question has reading tests: plain, indirect, past-tense or dated, and a near miss that belongs to another answer, read with `check_readings` and every miss folded back.
