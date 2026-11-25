@@ -66,4 +66,4 @@ Wording warnings, each with its `fix` (see [turning policy into questions](writi
 | `release_case_unreachable` | No rule reads a question, so no case can be held or conflict. If the document makes the decision depend on evidence, add that question to the rule's `when`; otherwise raise it with the job's approver. |
 | `release_case_source_refused` | Send the excerpt the way its kind's source rule takes it (its `source.url`, or as the system's record in its ID form), then `run_evals` again. |
 
-Fix the other warnings (`absence_question`, `duplicate_question`, `many_answers`, `date_in_answer`, `uncovered_passage`, `no_held_case`, `no_stale_case`, `source_class_not_quoted`, `source_class_quote_not_found`, `source_limit_not_enforced`, `state_not_confirmable`) where the document lets you; report the rest as gaps.
+Fix the other warnings (`absence_question`, `duplicate_question`, `many_answers`, `date_in_answer`, `uncovered_passage`, `no_held_case`, `no_stale_case`, `source_class_not_quoted`, `source_class_quote_not_found`, `freshness_quote_not_found`, `source_limit_not_enforced`, `state_not_confirmable`) where the document lets you; report the rest as gaps.
