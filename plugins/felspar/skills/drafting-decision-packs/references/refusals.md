@@ -39,6 +39,11 @@ Blocking findings, each in `warnings` with `severity: "blocking"`:
 | `unrouted_none_of_these` | Add a rule for it, quoting where the document says it leads; if the document doesn't say, suggest wording for the owner to add. |
 | `untested_threshold` | Add a case at the last value that meets it and one at the first that doesn't, with the outcome the document gives each. |
 | `untested_band_edge` | Add cases at the last total in the band and the first outside it, with the outcome the document gives each. |
+| `coverage_missing` | Add coverage: each material passage of the document, quoted, with its categories and what became of it (represented, needs_review or unsupported), starting with the passages it names. |
+| `uncovered_passage` | Add the passage at its line to coverage with its categories and what became of it: represented, needs_review or unsupported. |
+| `thin_number_or_date` | Take its fixes in order: a sentence of the document at its line, or the owner question with its recommended default. |
+
+`coverage_missing`, `uncovered_passage` and `thin_number_or_date` refuse only a job's first release. On a revision of a released job they are warnings: report them in the revision's gap list and close what the revision can.
 
 Wording warnings, each with its `fix` (see [turning policy into questions](writing-questions.md)):
 
@@ -51,6 +56,8 @@ Wording warnings, each with its `fix` (see [turning policy into questions](writi
 | `agent_conclusion` | Ask what the source record says; an agent's conclusion is never evidence. |
 | `adverse_outcome_unmarked` | An outcome reads as going against the case but isn't marked adverse, so it acts without a person. Add `"adverse": true` if the document wants a person to see it first; if it really should act unattended, leave it and record that in the gap report. |
 | `overlapping_answers` | Give each answer text only it describes, or split the question. |
+| `undeclared_related_record` | A question or a `subjects` passage names a record other than the case's own (the policy a new one replaces, a parent account). Add the relationship its `fix` suggests, with the document's own definition of that record, and set `about` on the questions about that record, before any eval case is marked `gate: true`. If it is the case's own record, leave it and say so in the gap report. |
+| `no_reading_tests` | Keep the phrasings you read with `check_readings` for that question in `readingTests`, each with the answer a person would pick. |
 | `job_routing_missing` | The job has no `purpose` or no `useWhen` (`path` names which), so an agent that may run several jobs can't pick it, and its release will be refused. Quote both from the document; if it doesn't say, suggest wording for the owner to add. |
 | `release_no_eval_set`, `release_case_missing` | Save the eval set with a marked (`gate: true`) case of each kind the warning names: an outcome, a hold, a conflict. |
 | `decided_share_below_bar` | The newest `run_evals` of this draft decided under 80% of the cases expecting an outcome as expected. `read_eval_run` it, look at the held and wrong cases and fix the wording through the edit loop, then run again; never change a case's expected outcome to pass. It never blocks a release. |
